@@ -1,11 +1,20 @@
 import os
 import time
 import re
+import boto3
 from pythonping import ping
 
 def overwrite_check(absfilename):
     if os.path.exists(absfilename):
         raise Exception(f'File {absfilename} already exists.')
+
+def get_zone_id(host):
+    client = boto3.client('route53')
+    responses = client.list_hosted_zones_by_name(DNSName=host, MaxItems='1')
+    fullzone = responses['HostedZones'][0]['Id']
+    if fullzone is None:
+        raise Exception('failed to find Route 53 Zone for host {host}.')
+    return fullzone.split("/")[2]
 
 def ping_address(url):
     try:
@@ -38,6 +47,7 @@ def attach(host, subdomain, destination):
 
     # TODO: ping destination, raise EXCEPTION if non-200
     # API Gateway doesn't allow ping, so to check I suggest to use AWS SDK (boto3). Probably same can be done for subdomain 
+    variables['route53-zone-id'] = get_zone_id(host)
 
     fn = 'setup.tfvars'
     overwrite_check(fn)
