@@ -16,6 +16,25 @@ def get_zone_id(host):
         raise Exception('failed to find Route 53 Zone for host {host}.')
     return fullzone.split("/")[2]
 
+def check_rest_api(region, api):
+    client = boto3.client('apigateway', region_name = region)
+    try:
+        response = client.get_rest_api(
+            restApiId = api
+        )
+    except client.exceptions.NotFoundException as e:
+        raise Exception(f'failed to API Gateway Rest API {api} in region {region}')
+
+def check_rest_api_stage(region, api, stage):
+    client = boto3.client('apigateway', region_name = region)
+    try:
+        response = client.get_stage(
+            restApiId = api,
+            stageName = stage
+        )
+    except client.exceptions.NotFoundException as e:
+        raise Exception(f'failed to API Gateway stage {stage} deployed on Rest API {api} in region {region}')
+
 def ping_address(url):
     try:
         response_list = ping(url)
@@ -40,6 +59,9 @@ def attach(host, subdomain, destination):
     
     variables = {'host': host, 'subdomain': subdomain}
     parse_destination(destination, variables)
+
+    check_rest_api(variables['region'], variables['api-id'])
+    check_rest_api_stage(variables['region'], variables['api-id'], variables['stage'])
 
     if ping_address(f'{subdomain}.{host}'):
         error = f'Subdomain {subdomain}.{host} already exists.'
