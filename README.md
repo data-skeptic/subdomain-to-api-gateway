@@ -4,6 +4,8 @@ It is surprising difficult to use AWS in certain situations.  One of the worst i
 
 As a developer on this project, you are **FORBIDDEN** from changing `app.py`.  It is set up, but design, in a very simple way to make sure your work is delivered in a format which is usable for us as a company.  You are free to change and update every other file, but DO NOT modify `app.py` without first getting explicit permission.  You may add default parameters in `worker.py`, but you MUST call the functions in `worker.py` as instructed in `app.py`.
 
+Please do not forget to fill 'setup-static.tfvars' with values from you AWS account.
+
 Uses:
 
 * Terraform
